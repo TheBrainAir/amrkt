@@ -5,7 +5,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Typing: typed](https://img.shields.io/badge/typing-typed-green.svg)](https://www.python.org/dev/peps/pep-0561/)
 
-**Async Python library for Telegram Gift Market API (tgmrkt.io)**
+**Async Python library for mrkt marketplace**
 
 A fast, type-safe, and secure library with automatic authentication handling.
 
