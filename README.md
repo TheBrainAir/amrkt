@@ -7,7 +7,8 @@
 
 **Async Python library for mrkt marketplace**
 
-A fast, type-safe, and secure library with automatic authentication handling.
+- Dev: [@thebraina1r](https://t.me/thebraina1r)
+- Community: [@amrkt_lib](https://t.me/amrkt_lib)
 
 ## Features
 
