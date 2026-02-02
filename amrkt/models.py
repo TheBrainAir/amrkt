@@ -202,6 +202,31 @@ class PurchaseResult(BaseModel):
         return self.price / 1_000_000_000
 
 
+class FeedItem(BaseModel):
+    """Feed item model representing a market activity event."""
+    type: str  # "listing", "sale", "change_price"
+    id: str
+    gift: Gift
+    amount: int = 0
+    date: Optional[datetime] = None
+    
+    class Config:
+        populate_by_name = True
+    
+    @property
+    def amount_ton(self) -> float:
+        """Amount in TON."""
+        return self.amount / 1_000_000_000
+
+
+class FeedResponse(BaseModel):
+    """Response from the feed API."""
+    items: List[FeedItem] = Field(default_factory=list)
+    
+    class Config:
+        populate_by_name = True
+
+
 class SearchParams(BaseModel):
     """Parameters for gift search."""
     collection_names: List[str] = Field(default_factory=list, alias="collectionNames")

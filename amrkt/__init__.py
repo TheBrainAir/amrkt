@@ -18,6 +18,8 @@ from .models import (
     PurchaseResult,
     SearchParams,
     Wallet,
+    FeedItem,
+    FeedResponse,
 )
 from .exceptions import (
     MarketError,
@@ -28,7 +30,7 @@ from .exceptions import (
     APIError,
 )
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 __all__ = [
     "MarketClient",
     "UserInfo",
@@ -38,6 +40,8 @@ __all__ = [
     "PurchaseResult",
     "SearchParams",
     "Wallet",
+    "FeedItem",
+    "FeedResponse",
     "MarketError",
     "AuthenticationError",
     "NotFoundError",
@@ -45,3 +49,4 @@ __all__ = [
     "InsufficientBalanceError",
     "APIError",
 ]
+

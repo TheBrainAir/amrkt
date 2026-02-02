@@ -7,8 +7,7 @@
 
 **Async Python library for mrkt marketplace**
 
-- Dev: [@thebraina1r](https://t.me/thebraina1r)
-- Community: [@amrkt_lib](https://t.me/amrkt_lib)
+A fast, type-safe, and secure library with automatic authentication handling.
 
 ## Features
 
@@ -203,6 +202,28 @@ if success:
 
 ---
 
+### Feed Methods
+
+#### `get_feed() → FeedResponse`
+
+Get market activity feed including listings, sales, and price changes.
+
+```python
+feed = await client.get_feed()
+
+for item in feed.items:
+    print(f"[{item.type}] {item.gift.title}")
+    print(f"  Price: {item.amount_ton:.2f} TON")
+    print(f"  Date: {item.date}")
+```
+
+Item types:
+- `listing` - New gift listed for sale
+- `sale` - Gift was sold
+- `change_price` - Price was changed
+
+---
+
 ## Data Models
 
 ### UserInfo
@@ -261,6 +282,22 @@ if success:
 | `model_rarity_percent` | `float` | Model rarity % (property) |
 | `backdrop_rarity_percent` | `float` | Backdrop rarity % (property) |
 | `symbol_rarity_percent` | `float` | Symbol rarity % (property) |
+
+### FeedItem
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `type` | `str` | Event type: "listing", "sale", "change_price" |
+| `id` | `str` | Event ID |
+| `gift` | `Gift` | Gift object |
+| `amount` / `amount_ton` | `int` / `float` | Price in nanoTON / TON |
+| `date` | `datetime` | Event timestamp |
+
+### FeedResponse
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `items` | `List[FeedItem]` | List of feed items |
 
 ---
 

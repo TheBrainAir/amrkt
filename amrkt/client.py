@@ -15,6 +15,7 @@ from .models import (
     GiftList,
     PurchaseResult,
     SearchParams,
+    FeedResponse,
 )
 from .exceptions import (
     AuthenticationError,
@@ -345,3 +346,18 @@ class MarketClient:
         """
         await self._request("POST", "/gifts/return", json={"Ids": gift_ids})
         return True
+    
+    # ==================== Feed API ====================
+    
+    async def get_feed(self) -> FeedResponse:
+        """
+        Get market activity feed.
+        
+        Returns feed items including listings, sales, and price changes.
+        
+        Returns:
+            FeedResponse: Feed with list of market activity items
+        """
+        data = await self._request("POST", "/feed", json={})
+        return FeedResponse.model_validate(data)
+
