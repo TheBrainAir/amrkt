@@ -16,6 +16,7 @@ from .models import (
     PurchaseResult,
     SearchParams,
     FeedResponse,
+    SaleResult,
 )
 from .exceptions import (
     AuthenticationError,
@@ -360,4 +361,90 @@ class MarketClient:
         """
         data = await self._request("POST", "/feed", json={})
         return FeedResponse.model_validate(data)
-
+    
+    # ==================== Sale API ====================
+    
+    async def sell_gifts(self, gift_ids: List[str], prices: List[int]) -> SaleResult:
+        """
+        List gifts for sale on the market.
+        
+        Args:
+            gift_ids: List of gift IDs to sell
+            prices: List of prices in nanoTON (must match gift_ids order)
+        
+        Returns:
+            SaleResult: Result with confirmed ids and prices
+        
+        Raises:
+            ValueError: If gift_ids and prices lists have different lengths
+            APIError: If listing fails
+        
+        Example:
+            # Sell gift for 10 TON
+            result = await client.sell_gifts(
+                ["gift_id_1"],
+                [10_000_000_000]  # 10 TON in nanoTON
+            )
+        """
+        if len(gift_ids) != len(prices):
+            raise ValueError("gift_ids and prices must have the same length")
+        
+        data = await self._request(
+            "POST",
+            "/gifts/sale",
+            json={"ids": gift_ids, "prices": prices}
+        )
+        return SaleResult.model_validate(data)
+    
+    async def cancel_sale(self, gift_ids: List[str]) -> List[str]:
+        """
+        Cancel sale listings for gifts.
+        
+        Args:
+            gift_ids: List of gift IDs to remove from sale
+        
+        Returns:
+            List[str]: List of gift IDs that were successfully cancelled
+        
+        Example:
+            cancelled = await client.cancel_sale(["gift_id_1"])
+            print(f"Cancelled {len(cancelled)} listings")
+        """
+        data = await self._request(
+            "POST",
+            "/gifts/sale/cancel",
+            json={"ids": gift_ids}
+        )
+        return data if isinstance(data, list) else []
+    
+    async def change_price(self, gift_ids: List[str], prices: List[int]) -> SaleResult:
+        """
+        Change prices for gifts already listed for sale.
+        
+        Args:
+            gift_ids: List of gift IDs to update
+            prices: List of new prices in nanoTON (must match gift_ids order)
+        
+        Returns:
+            SaleResult: Result with confirmed ids and new prices
+        
+        Raises:
+            ValueError: If gift_ids and prices lists have different lengths
+            APIError: If price change fails
+        
+        Example:
+            # Change price to 15 TON
+            result = await client.change_price(
+                ["gift_id_1"],
+                [15_000_000_000]  # 15 TON in nanoTON
+            )
+        """
+        if len(gift_ids) != len(prices):
+            raise ValueError("gift_ids and prices must have the same length")
+        
+        data = await self._request(
+            "POST",
+            "/gifts/sale/change-price",
+            json={"ids": gift_ids, "prices": prices}
+        )
+        return SaleResult.model_validate(data)

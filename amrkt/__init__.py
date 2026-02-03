@@ -20,6 +20,7 @@ from .models import (
     Wallet,
     FeedItem,
     FeedResponse,
+    SaleResult,
 )
 from .exceptions import (
     MarketError,
@@ -30,7 +31,7 @@ from .exceptions import (
     APIError,
 )
 
-__version__ = "1.1.0"
+__version__ = "1.2.0"
 __all__ = [
     "MarketClient",
     "UserInfo",
@@ -42,6 +43,7 @@ __all__ = [
     "Wallet",
     "FeedItem",
     "FeedResponse",
+    "SaleResult",
     "MarketError",
     "AuthenticationError",
     "NotFoundError",

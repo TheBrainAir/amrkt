@@ -227,6 +227,27 @@ class FeedResponse(BaseModel):
         populate_by_name = True
 
 
+class SaleResult(BaseModel):
+    """Result of selling gifts."""
+    ids: List[str] = Field(default_factory=list)
+    prices: List[int] = Field(default_factory=list)
+    
+    class Config:
+        populate_by_name = True
+    
+    @property
+    def prices_ton(self) -> List[float]:
+        """Prices in TON."""
+        return [p / 1_000_000_000 for p in self.prices]
+    
+    def get_sale_info(self) -> List[dict]:
+        """Get list of sale info as dicts with id and price."""
+        return [
+            {"id": gift_id, "price": price, "price_ton": price / 1_000_000_000}
+            for gift_id, price in zip(self.ids, self.prices)
+        ]
+
+
 class SearchParams(BaseModel):
     """Parameters for gift search."""
     collection_names: List[str] = Field(default_factory=list, alias="collectionNames")

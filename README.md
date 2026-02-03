@@ -202,6 +202,66 @@ if success:
 
 ---
 
+### Sale Methods
+
+#### `sell_gifts(gift_ids, prices) → SaleResult`
+
+List gifts for sale on the market.
+
+```python
+# Sell a gift for 10 TON
+result = await client.sell_gifts(
+    ["gift_id_1"],           # List of gift IDs
+    [10_000_000_000]         # Prices in nanoTON (10 TON)
+)
+
+# Multiple gifts at once
+result = await client.sell_gifts(
+    ["gift_id_1", "gift_id_2"],
+    [5_000_000_000, 15_000_000_000]  # 5 TON and 15 TON
+)
+
+# Get confirmed info
+for info in result.get_sale_info():
+    print(f"Listed {info['id']} for {info['price_ton']:.2f} TON")
+```
+
+#### `cancel_sale(gift_ids) → List[str]`
+
+Cancel sale listings and remove gifts from the market.
+
+```python
+# Cancel a single listing
+cancelled = await client.cancel_sale(["gift_id_1"])
+
+# Cancel multiple listings
+cancelled = await client.cancel_sale(["gift_id_1", "gift_id_2"])
+print(f"Cancelled {len(cancelled)} listings")
+```
+
+#### `change_price(gift_ids, prices) → SaleResult`
+
+Change prices for gifts already listed for sale.
+
+```python
+# Update price to 15 TON
+result = await client.change_price(
+    ["gift_id_1"],
+    [15_000_000_000]  # New price in nanoTON
+)
+
+# Update multiple prices
+result = await client.change_price(
+    ["gift_id_1", "gift_id_2"],
+    [10_000_000_000, 20_000_000_000]
+)
+
+for info in result.get_sale_info():
+    print(f"Updated {info['id']} to {info['price_ton']:.2f} TON")
+```
+
+---
+
 ### Feed Methods
 
 #### `get_feed() → FeedResponse`
@@ -298,6 +358,13 @@ Item types:
 | Field | Type | Description |
 |-------|------|-------------|
 | `items` | `List[FeedItem]` | List of feed items |
+
+### SaleResult
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `ids` | `List[str]` | List of gift IDs listed for sale |
+| `prices` / `prices_ton` | `List[int]` / `List[float]` | Prices in nanoTON / TON |
 
 ---
 
