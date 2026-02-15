@@ -80,9 +80,16 @@ class MarketClient:
             return False
         
         try:
-            response = requests.get(
+            response = requests.post(
                 f"{self.API_URL}/gifts/saling",
-                headers=self._get_headers()
+                headers=self._get_headers(),
+                json={
+                    "collectionNames": [], "modelNames": [], "backdropNames": [],
+                    "symbolNames": [], "ordering": "Price", "lowToHigh": False,
+                    "maxPrice": None, "minPrice": None, "mintable": None,
+                    "number": None, "count": 1, "cursor": "", "query": None,
+                    "promotedFirst": False,
+                }
             )
             return response.status_code != 401
         except Exception:
@@ -139,7 +146,9 @@ class MarketClient:
         method: str,
         endpoint: str,
         json: dict = None,
-        retry_on_401: bool = True
+        params: dict = None,
+        retry_on_401: bool = True,
+        expect_json: bool = True,
     ) -> dict:
         """Make an API request with automatic token refresh."""
         await self._ensure_authenticated()
@@ -147,14 +156,17 @@ class MarketClient:
         url = f"{self.API_URL}{endpoint}"
         
         if method == "GET":
-            response = requests.get(url, headers=self._get_headers())
+            response = requests.get(url, headers=self._get_headers(), params=params)
         else:
-            response = requests.post(url, headers=self._get_headers(), json=json)
+            response = requests.post(url, headers=self._get_headers(), json=json, params=params)
         
         # Handle token expiration
         if response.status_code == 401 and retry_on_401:
             self._token = await self._get_new_token()
-            return await self._request(method, endpoint, json, retry_on_401=False)
+            return await self._request(
+                method, endpoint, json, params=params,
+                retry_on_401=False, expect_json=expect_json,
+            )
         
         if response.status_code == 404:
             raise NotFoundError(f"Resource not found: {endpoint}")
@@ -166,6 +178,8 @@ class MarketClient:
                 response_text=response.text
             )
         
+        if not expect_json:
+            return {}
         return response.json()
     
     # ==================== User API ====================
@@ -448,3 +462,60 @@ class MarketClient:
             json={"ids": gift_ids, "prices": prices}
         )
         return SaleResult.model_validate(data)
+    
+    # ==================== Offers API ====================
+    
+    async def create_offer(self, gift_sale_id: str, price: int) -> bool:
+        """
+        Create an offer for a gift on sale.
+        
+        Args:
+            gift_sale_id: The sale ID of the gift to make an offer on
+            price: Offer price in nanoTON
+        
+        Returns:
+            bool: True if offer was created successfully
+        
+        Raises:
+            APIError: If offer creation fails
+        
+        Example:
+            # Make an offer of 2 TON
+            success = await client.create_offer(
+                "gift_sale_id",
+                2_000_000_000  # 2 TON in nanoTON
+            )
+        """
+        await self._request(
+            "POST",
+            "/offers/create",
+            json={"price": price, "giftSaleId": gift_sale_id},
+            expect_json=False,
+        )
+        return True
+    
+    async def cancel_offer(self, offer_id: str) -> bool:
+        """
+        Cancel an existing offer by its ID.
+        
+        Args:
+            offer_id: The ID of the offer to cancel
+        
+        Returns:
+            bool: True if offer was cancelled successfully
+        
+        Raises:
+            APIError: If offer cancellation fails
+        
+        Example:
+            success = await client.cancel_offer("offer_id")
+            if success:
+                print("Offer cancelled!")
+        """
+        await self._request(
+            "POST",
+            "/offers/cancel",
+            params={"offerId": offer_id},
+            expect_json=False,
+        )
+        return True

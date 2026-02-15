@@ -81,12 +81,14 @@ class Gift(BaseModel):
     model_name: Optional[str] = Field(default=None, alias="modelName")
     model_title: Optional[str] = Field(default=None, alias="modelTitle")
     model_rarity_per_mille: int = Field(default=0, alias="modelRarityPerMille")
+    model_rarity_name: Optional[str] = Field(default=None, alias="modelRarityName")
     model_sticker_key: Optional[str] = Field(default=None, alias="modelStickerKey")
     model_sticker_thumbnail_key: Optional[str] = Field(default=None, alias="modelStickerThumbnailKey")
     
     # Backdrop info
     backdrop_name: Optional[str] = Field(default=None, alias="backdropName")
     backdrop_rarity_per_mille: int = Field(default=0, alias="backdropRarityPerMille")
+    backdrop_rarity_name: Optional[str] = Field(default=None, alias="backdropRarityName")
     backdrop_colors_center_color: Optional[int] = Field(default=None, alias="backdropColorsCenterColor")
     backdrop_colors_edge_color: Optional[int] = Field(default=None, alias="backdropColorsEdgeColor")
     backdrop_colors_text_color: Optional[int] = Field(default=None, alias="backdropColorsTextColor")
@@ -95,6 +97,7 @@ class Gift(BaseModel):
     # Symbol info
     symbol_name: Optional[str] = Field(default=None, alias="symbolName")
     symbol_rarity_per_mille: int = Field(default=0, alias="symbolRarityPerMille")
+    symbol_rarity_name: Optional[str] = Field(default=None, alias="symbolRarityName")
     symbol_sticker_key: Optional[str] = Field(default=None, alias="symbolStickerKey")
     symbol_sticker_thumbnail_key: Optional[str] = Field(default=None, alias="symbolStickerThumbnailKey")
     
@@ -131,6 +134,9 @@ class Gift(BaseModel):
     gift_type: Optional[str] = Field(default=None, alias="giftType")
     lucky_buy: bool = Field(default=False, alias="luckyBuy")
     craftable: bool = Field(default=False)
+    is_crafted: bool = Field(default=False, alias="isCrafted")
+    tg_can_be_crafted: bool = Field(default=False, alias="tgCanBeCrafted")
+    minted: bool = Field(default=False)
     premarket_status: Optional[str] = Field(default=None, alias="premarketStatus")
     wait_gift_until: Optional[str] = Field(default=None, alias="waitGiftUntil")
     regular_gift_validation: Optional[str] = Field(default=None, alias="regularGiftValidation")

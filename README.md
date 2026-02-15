@@ -262,6 +262,34 @@ for info in result.get_sale_info():
 
 ---
 
+### Offer Methods
+
+#### `create_offer(gift_sale_id, price) → bool`
+
+Create an offer for a gift on sale.
+
+```python
+# Make an offer of 2 TON on a gift
+success = await client.create_offer(
+    "gift_sale_id",          # Sale ID of the gift
+    2_000_000_000            # Price in nanoTON (2 TON)
+)
+if success:
+    print("Offer created!")
+```
+
+#### `cancel_offer(offer_id) → bool`
+
+Cancel an existing offer by its ID.
+
+```python
+success = await client.cancel_offer("offer_id")
+if success:
+    print("Offer cancelled!")
+```
+
+---
+
 ### Feed Methods
 
 #### `get_feed() → FeedResponse`
@@ -321,10 +349,13 @@ Item types:
 | `model_name` | `str` | Model name |
 | `model_title` | `str` | Model title |
 | `model_rarity_per_mille` | `int` | Model rarity (per mille) |
+| `model_rarity_name` | `str` | Model rarity name |
 | `backdrop_name` | `str` | Backdrop name |
 | `backdrop_rarity_per_mille` | `int` | Backdrop rarity (per mille) |
+| `backdrop_rarity_name` | `str` | Backdrop rarity name |
 | `symbol_name` | `str` | Symbol name |
 | `symbol_rarity_per_mille` | `int` | Symbol rarity (per mille) |
+| `symbol_rarity_name` | `str` | Symbol rarity name |
 | `sale_price` / `sale_price_ton` | `int` / `float` | Sale price |
 | `sale_price_without_fee` | `int` | Price without fee |
 | `is_on_sale` | `bool` | Sale status |
@@ -338,6 +369,9 @@ Item types:
 | `gift_type` | `str` | Gift type ("Upgraded", etc.) |
 | `lucky_buy` | `bool` | Lucky buy status |
 | `craftable` | `bool` | Craftable status |
+| `is_crafted` | `bool` | Whether gift is crafted |
+| `tg_can_be_crafted` | `bool` | Can be crafted in Telegram |
+| `minted` | `bool` | Minted status |
 | `premarket_status` | `str` | Premarket status |
 | `model_rarity_percent` | `float` | Model rarity % (property) |
 | `backdrop_rarity_percent` | `float` | Backdrop rarity % (property) |
