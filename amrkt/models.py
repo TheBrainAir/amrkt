@@ -80,14 +80,14 @@ class Gift(BaseModel):
     # Model info
     model_name: Optional[str] = Field(default=None, alias="modelName")
     model_title: Optional[str] = Field(default=None, alias="modelTitle")
-    model_rarity_per_mille: int = Field(default=0, alias="modelRarityPerMille")
+    model_rarity_per_mille: Optional[int] = Field(default=0, alias="modelRarityPerMille")
     model_rarity_name: Optional[str] = Field(default=None, alias="modelRarityName")
     model_sticker_key: Optional[str] = Field(default=None, alias="modelStickerKey")
     model_sticker_thumbnail_key: Optional[str] = Field(default=None, alias="modelStickerThumbnailKey")
     
     # Backdrop info
     backdrop_name: Optional[str] = Field(default=None, alias="backdropName")
-    backdrop_rarity_per_mille: int = Field(default=0, alias="backdropRarityPerMille")
+    backdrop_rarity_per_mille: Optional[int] = Field(default=0, alias="backdropRarityPerMille")
     backdrop_rarity_name: Optional[str] = Field(default=None, alias="backdropRarityName")
     backdrop_colors_center_color: Optional[int] = Field(default=None, alias="backdropColorsCenterColor")
     backdrop_colors_edge_color: Optional[int] = Field(default=None, alias="backdropColorsEdgeColor")
@@ -96,7 +96,7 @@ class Gift(BaseModel):
     
     # Symbol info
     symbol_name: Optional[str] = Field(default=None, alias="symbolName")
-    symbol_rarity_per_mille: int = Field(default=0, alias="symbolRarityPerMille")
+    symbol_rarity_per_mille: Optional[int] = Field(default=0, alias="symbolRarityPerMille")
     symbol_rarity_name: Optional[str] = Field(default=None, alias="symbolRarityName")
     symbol_sticker_key: Optional[str] = Field(default=None, alias="symbolStickerKey")
     symbol_sticker_thumbnail_key: Optional[str] = Field(default=None, alias="symbolStickerThumbnailKey")
@@ -171,17 +171,17 @@ class Gift(BaseModel):
     @property
     def model_rarity_percent(self) -> float:
         """Model rarity as percentage."""
-        return self.model_rarity_per_mille / 10
+        return (self.model_rarity_per_mille or 0) / 10
     
     @property
     def backdrop_rarity_percent(self) -> float:
         """Backdrop rarity as percentage."""
-        return self.backdrop_rarity_per_mille / 10
+        return (self.backdrop_rarity_per_mille or 0) / 10
     
     @property
     def symbol_rarity_percent(self) -> float:
         """Symbol rarity as percentage."""
-        return self.symbol_rarity_per_mille / 10
+        return (self.symbol_rarity_per_mille or 0) / 10
 
 
 class GiftList(BaseModel):

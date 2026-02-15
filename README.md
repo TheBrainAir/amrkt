@@ -348,13 +348,13 @@ Item types:
 | `collection_title` | `str` | Collection title |
 | `model_name` | `str` | Model name |
 | `model_title` | `str` | Model title |
-| `model_rarity_per_mille` | `int` | Model rarity (per mille) |
+| `model_rarity_per_mille` | `Optional[int]` | Model rarity (per mille), may be None |
 | `model_rarity_name` | `str` | Model rarity name |
 | `backdrop_name` | `str` | Backdrop name |
-| `backdrop_rarity_per_mille` | `int` | Backdrop rarity (per mille) |
+| `backdrop_rarity_per_mille` | `Optional[int]` | Backdrop rarity (per mille), may be None |
 | `backdrop_rarity_name` | `str` | Backdrop rarity name |
 | `symbol_name` | `str` | Symbol name |
-| `symbol_rarity_per_mille` | `int` | Symbol rarity (per mille) |
+| `symbol_rarity_per_mille` | `Optional[int]` | Symbol rarity (per mille), may be None |
 | `symbol_rarity_name` | `str` | Symbol rarity name |
 | `sale_price` / `sale_price_ton` | `int` / `float` | Sale price |
 | `sale_price_without_fee` | `int` | Price without fee |
