@@ -20,6 +20,8 @@ from .models import (
     Wallet,
     ConfigItem,
     RefCoefsDto,
+    DepositAwaitTransaction,
+    ClaimTransactionResult,
     FeedItem,
     FeedResponse,
     SaleResult,
@@ -33,7 +35,7 @@ from .exceptions import (
     APIError,
 )
 
-__version__ = "1.3.2"
+__version__ = "1.3.3"
 __all__ = [
     "MarketClient",
     "UserInfo",
@@ -45,6 +47,8 @@ __all__ = [
     "Wallet",
     "ConfigItem",
     "RefCoefsDto",
+    "DepositAwaitTransaction",
+    "ClaimTransactionResult",
     "FeedItem",
     "FeedResponse",
     "SaleResult",

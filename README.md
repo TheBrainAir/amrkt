@@ -117,6 +117,36 @@ print(balance.hard_ton)     # Hard in TON
 print(balance.total_hard_ton)  # Total hard in TON
 ```
 
+#### `get_deposit_await() → List[DepositAwaitTransaction]`
+
+Get pending deposit transactions awaiting confirmation.
+
+```python
+deposits = await client.get_deposit_await()
+
+for dep in deposits:
+    print(f"ID: {dep.id}")
+    print(f"Type: {dep.currency_type}")    # "Hard" or "Soft"
+    print(f"Value: {dep.value_ton:.2f} TON")
+    print(f"Claimed: {dep.is_claimed}")
+    print(f"Refunded: {dep.is_refunded}")
+    print(f"Received: {dep.received_at}")
+```
+
+#### `claim_transaction(transaction_id) → List[ClaimTransactionResult]`
+
+Claim a pending deposit transaction by its ID (from `get_deposit_await()`).
+
+```python
+deposits = await client.get_deposit_await()
+
+for dep in deposits:
+    if not dep.is_claimed:
+        results = await client.claim_transaction(dep.id)
+        for r in results:
+            print(f"Claimed {r.value_ton:.2f} TON ({r.type})")
+```
+
 ---
 
 ### Gift Methods
@@ -384,6 +414,26 @@ User profile from `GET /me` API.
 | `stars` | `int` | Stars count |
 | `spices` | `int` | Spices count |
 | `friends_count` | `int` | Referral count |
+
+### DepositAwaitTransaction
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | `str` | Transaction ID (UUID) |
+| `currency_type` | `str` | Currency type ("Hard" or "Soft") |
+| `value` / `value_ton` | `int` / `float` | Value in nanoTON |
+| `soft_value` | `int` | Soft value in nanoTON |
+| `received_at` | `str` | Received timestamp (ISO 8601) |
+| `is_claimed` | `bool` | Whether deposit was claimed |
+| `is_refunded` | `bool` | Whether deposit was refunded |
+
+### ClaimTransactionResult
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `value` / `value_ton` | `int` / `float` | Claimed amount in nanoTON / TON |
+| `type` | `str` | Currency type ("hard" or "soft") |
+| `source` | `Optional[str]` | Claim source |
 
 ### Gift
 

@@ -103,6 +103,40 @@ class Balance(BaseModel):
         return self.hard_locked / 1_000_000_000
 
 
+class DepositAwaitTransaction(BaseModel):
+    """Pending deposit transaction from /transactions/await."""
+    id: str
+    currency_type: str = Field(alias="currencyType")
+    value: int = 0
+    soft_value: int = Field(default=0, alias="softValue")
+    received_at: str = Field(alias="receivedAt")
+    is_claimed: bool = Field(default=False, alias="isClaimed")
+    is_refunded: bool = Field(default=False, alias="isRefunded")
+
+    class Config:
+        populate_by_name = True
+
+    @property
+    def value_ton(self) -> float:
+        """Value in TON."""
+        return self.value / 1_000_000_000
+
+
+class ClaimTransactionResult(BaseModel):
+    """Result item from claiming a deposit via POST /transactions/{id}."""
+    value: int = 0
+    type: str = ""
+    source: Optional[str] = None
+
+    class Config:
+        populate_by_name = True
+
+    @property
+    def value_ton(self) -> float:
+        """Value in TON."""
+        return self.value / 1_000_000_000
+
+
 class Gift(BaseModel):
     """Gift item model."""
     id: str

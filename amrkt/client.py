@@ -11,6 +11,8 @@ from curl_cffi import requests
 from .models import (
     UserInfo,
     Balance,
+    DepositAwaitTransaction,
+    ClaimTransactionResult,
     Gift,
     GiftList,
     PurchaseResult,
@@ -205,6 +207,29 @@ class MarketClient:
         """
         data = await self._request("GET", "/balance")
         return Balance.model_validate(data)
+    
+    async def get_deposit_await(self) -> List[DepositAwaitTransaction]:
+        """
+        Get pending deposit transactions awaiting confirmation.
+        
+        Returns:
+            List[DepositAwaitTransaction]: Pending deposits
+        """
+        data = await self._request("GET", "/transactions/await")
+        return [DepositAwaitTransaction.model_validate(t) for t in (data or [])]
+    
+    async def claim_transaction(self, transaction_id: str) -> List[ClaimTransactionResult]:
+        """
+        Claim a pending deposit transaction.
+        
+        Args:
+            transaction_id: ID of the transaction to claim (from get_deposit_await)
+        
+        Returns:
+            List[ClaimTransactionResult]: Claimed amounts
+        """
+        data = await self._request("POST", f"/transactions/{transaction_id}")
+        return [ClaimTransactionResult.model_validate(t) for t in (data or [])]
     
     # ==================== Gifts API ====================
     
