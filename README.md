@@ -84,11 +84,15 @@ Get current user profile information.
 ```python
 user = await client.get_user_info()
 
-print(user.id)              # User ID
-print(user.full_name)       # Display name
-print(user.is_vip)          # VIP status
-print(user.wallet.ton)      # TON wallet address
-print(user.ref_url)         # Referral URL
+print(user.id)                    # User ID
+print(user.full_name)             # Display name
+print(user.is_vip)                # VIP status
+print(user.wallet.ton)            # TON wallet address
+print(user.ref_url)               # Referral URL
+print(user.photo)                 # Avatar URL
+print(user.wallet_for_payment)     # Payment wallet
+print(user.server_time)           # Server timestamp
+# Access config: user.configs, user.ref_coefs_dto
 ```
 
 ---
@@ -316,13 +320,60 @@ Item types:
 
 ### UserInfo
 
+User profile from `GET /me` API.
+
 | Field | Type | Description |
 |-------|------|-------------|
 | `id` | `int` | User ID |
+| `account_id` | `Optional[int]` | Account ID |
+| `user_ton_id` | `Optional[str]` | TON user ID |
+| `registered_at` | `Optional[str]` | Registration date (ISO 8601) |
+| `category` | `Optional[str]` | User category (e.g. "User") |
+| `photo` | `Optional[str]` | Avatar URL |
 | `full_name` | `str` | Display name |
-| `wallet` | `Wallet` | Wallet info |
+| `ref_url` | `Optional[str]` | Referral URL |
+| `invited_by` | `Optional[int]` | Inviter account ID |
+| `wallet` | `Optional[Wallet]` | Wallet info |
+| `allows_pm` | `bool` | Allow private messages |
+| `current_language_code` | `Optional[str]` | Language code |
+| `wallet_for_payment` | `Optional[str]` | Payment wallet address |
 | `is_vip` | `bool` | VIP status |
-| `ref_url` | `str` | Referral URL |
+| `payer_id` | `Optional[str]` | Payer ID |
+| `server_time` | `Optional[str]` | Server timestamp (ISO 8601) |
+| `in_game_link` | `Optional[str]` | In-game link base URL |
+| `referral_revenue_coef` | `float` | Referral revenue coefficient |
+| `giveaway_badge` | `Optional[str]` | Giveaway badge (e.g. "NoneBadge") |
+| `channel_validation_bot_name` | `Optional[str]` | Channel validation bot |
+| `configs` | `List[ConfigItem]` | App config key-value pairs |
+| `ref_coefs_dto` | `Optional[RefCoefsDto]` | Referral coefficients by product type |
+| `disable_withdrawal_limit` | `bool` | Withdrawal limit disabled |
+| `disallowed_sections` | `List[str]` | Disallowed app sections |
+
+### Wallet
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `ton` | `Optional[str]` | TON wallet address |
+| `device_id` | `Optional[str]` | Device ID |
+
+### ConfigItem
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `key` | `str` | Config key |
+| `value` | `str` | Config value (may be JSON string) |
+
+### RefCoefsDto
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `referral_coef` | `float` | General referral coefficient |
+| `sticker_referral_coef` | `float` | Sticker referral coefficient |
+| `not_games_referral_coef` | `float` | Not-games referral coefficient |
+| `channel_referral_coef` | `float` | Channel referral coefficient |
+| `gifts_collection_referral_coef` | `float` | Gifts collection referral coefficient |
+| `stars_referral_coef` | `float` | Stars referral coefficient |
+| `tg_premium_referral_coef` | `float` | Telegram Premium referral coefficient |
 
 ### Balance
 

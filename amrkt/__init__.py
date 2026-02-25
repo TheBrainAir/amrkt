@@ -18,6 +18,8 @@ from .models import (
     PurchaseResult,
     SearchParams,
     Wallet,
+    ConfigItem,
+    RefCoefsDto,
     FeedItem,
     FeedResponse,
     SaleResult,
@@ -31,7 +33,7 @@ from .exceptions import (
     APIError,
 )
 
-__version__ = "1.3.1"
+__version__ = "1.3.2"
 __all__ = [
     "MarketClient",
     "UserInfo",
@@ -41,6 +43,8 @@ __all__ = [
     "PurchaseResult",
     "SearchParams",
     "Wallet",
+    "ConfigItem",
+    "RefCoefsDto",
     "FeedItem",
     "FeedResponse",
     "SaleResult",

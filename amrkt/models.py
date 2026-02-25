@@ -8,19 +8,59 @@ from datetime import datetime
 class Wallet(BaseModel):
     """User wallet information."""
     ton: Optional[str] = None
+    device_id: Optional[str] = Field(default=None, alias="deviceId")
+
+    class Config:
+        populate_by_name = True
+
+
+class ConfigItem(BaseModel):
+    """Key-value config entry from /me response."""
+    key: str
+    value: str
+
+
+class RefCoefsDto(BaseModel):
+    """Referral coefficients for different product types."""
+    referral_coef: float = Field(default=0, alias="referralCoef")
+    sticker_referral_coef: float = Field(default=0, alias="stickerReferralCoef")
+    not_games_referral_coef: float = Field(default=0, alias="notGamesReferralCoef")
+    channel_referral_coef: float = Field(default=0, alias="channelReferralCoef")
+    gifts_collection_referral_coef: float = Field(default=0, alias="giftsCollectionReferralCoef")
+    stars_referral_coef: float = Field(default=0, alias="starsReferralCoef")
+    tg_premium_referral_coef: float = Field(default=0, alias="tgPremiumReferralCoef")
+
+    class Config:
+        populate_by_name = True
 
 
 class UserInfo(BaseModel):
-    """User profile information."""
+    """User profile information from /me API."""
     id: int
-    full_name: str = Field(alias="fullName")
-    wallet: Optional[Wallet] = None
-    is_vip: bool = Field(default=False, alias="isVIP")
+    account_id: Optional[int] = Field(default=None, alias="accountId")
+    user_ton_id: Optional[str] = Field(default=None, alias="userTonId")
     registered_at: Optional[str] = Field(default=None, alias="registeredAt")
+    category: Optional[str] = None
+    photo: Optional[str] = None
+    full_name: str = Field(alias="fullName")
     ref_url: Optional[str] = Field(default=None, alias="refUrl")
+    invited_by: Optional[int] = Field(default=None, alias="invitedBy")
+    wallet: Optional[Wallet] = None
+    allows_pm: bool = Field(default=True, alias="allowsPm")
     current_language_code: Optional[str] = Field(default=None, alias="currentLanguageCode")
+    wallet_for_payment: Optional[str] = Field(default=None, alias="walletForPayment")
+    is_vip: bool = Field(default=False, alias="isVIP")
+    payer_id: Optional[str] = Field(default=None, alias="payerId")
+    server_time: Optional[str] = Field(default=None, alias="serverTime")
+    in_game_link: Optional[str] = Field(default=None, alias="inGameLink")
+    referral_revenue_coef: float = Field(default=0, alias="referralRevenueCoef")
     giveaway_badge: Optional[str] = Field(default=None, alias="giveawayBadge")
-    
+    channel_validation_bot_name: Optional[str] = Field(default=None, alias="channelValidationBotName")
+    configs: List[ConfigItem] = Field(default_factory=list)
+    ref_coefs_dto: Optional[RefCoefsDto] = Field(default=None, alias="refCoefsDto")
+    disable_withdrawal_limit: bool = Field(default=False, alias="disableWithdrawalLimit")
+    disallowed_sections: List[str] = Field(default_factory=list, alias="disallowedSections")
+
     class Config:
         populate_by_name = True
 
