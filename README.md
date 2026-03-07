@@ -69,7 +69,9 @@ MarketClient(
     api_id: int,                    # Telegram API ID
     api_hash: str,                  # Telegram API hash
     session_name: str = "amrkt",    # Pyrogram session name
-    workdir: str = "."              # Session file directory
+    workdir: str = ".",             # Session file directory
+    proxy: str = None,              # Optional: http://host:port, http://user:pass@host:port,
+    proxy_api_only: bool = False    # socks5://host:port. Use True if HTTP proxy gives 407
 )
 ```
 
@@ -541,6 +543,41 @@ client = MarketClient(
     api_hash="hash",
     session_name="my_bot",
     workdir="/path/to/sessions"
+)
+```
+
+### Proxy (HTTP / SOCKS5)
+
+Route all API requests and Telegram auth through a proxy. Supports HTTP and SOCKS5 with optional authentication.
+
+```python
+# HTTP proxy (no auth)
+client = MarketClient(
+    api_id=12345,
+    api_hash="hash",
+    proxy="http://proxy.example.com:8080"
+)
+
+# HTTP proxy with auth
+client = MarketClient(
+    api_id=12345,
+    api_hash="hash",
+    proxy="http://username:password@proxy.example.com:8080"
+)
+
+# SOCKS5 proxy with auth
+client = MarketClient(
+    api_id=12345,
+    api_hash="hash",
+    proxy="socks5://user:password@proxy.example.com:1080"
+)
+
+# HTTP proxy with 407 error? Use proxy_api_only — proxy for API only, direct Telegram
+client = MarketClient(
+    api_id=12345,
+    api_hash="hash",
+    proxy="http://user:pass@proxy.example.com:8080",
+    proxy_api_only=True  # API via proxy, Telegram connection direct
 )
 ```
 

@@ -1,7 +1,7 @@
 """Main client for amrkt library."""
 
-from typing import Optional, List
-from urllib.parse import unquote
+from typing import Optional, List, Dict, Any
+from urllib.parse import unquote, urlparse
 
 from pyrogram import Client
 from pyrogram.raw.functions.messages import RequestAppWebView
@@ -45,7 +45,9 @@ class MarketClient:
         api_id: int,
         api_hash: str,
         session_name: str = "amrkt_session",
-        workdir: str = "."
+        workdir: str = ".",
+        proxy: Optional[str] = None,
+        proxy_api_only: bool = False,
     ):
         """
         Initialize the Market client.
@@ -55,11 +57,19 @@ class MarketClient:
             api_hash: Telegram API hash from https://my.telegram.org/auth
             session_name: Name for the Pyrogram session file
             workdir: Working directory for session storage
+            proxy: Optional proxy URL for all requests. Format:
+                http://host:port, http://user:pass@host:port,
+                socks5://host:port, socks5://user:pass@host:port
+            proxy_api_only: If True, use proxy only for API requests (api.tgmrkt.io),
+                not for Telegram connection. Use when HTTP proxy causes 407 with Pyrogram.
+                Requires direct access to Telegram for auth.
         """
         self._api_id = api_id
         self._api_hash = api_hash
         self._session_name = session_name
         self._workdir = workdir
+        self._proxy = proxy
+        self._proxy_api_only = proxy_api_only
         self._client: Optional[Client] = None
         self._token: Optional[str] = None
     
@@ -76,6 +86,54 @@ class MarketClient:
         """Get authorization headers."""
         return {"Authorization": self._token} if self._token else {}
     
+    def _get_request_kwargs(self) -> Dict[str, Any]:
+        """Get kwargs for curl_cffi requests (proxy + proxy_auth)."""
+        if not self._proxy:
+            return {}
+        parsed = urlparse(self._proxy)
+        # For proxy with auth, curl_cffi needs proxy_auth separately
+        # to avoid 407 Proxy Authentication Required
+        if parsed.username and parsed.password:
+            default_port = 8080 if parsed.scheme in ("http", "https") else 1080
+            port = parsed.port or default_port
+            clean_proxy = f"{parsed.scheme}://{parsed.hostname}:{port}"
+            return {
+                "proxy": clean_proxy,
+                "proxy_auth": (
+                    unquote(parsed.username),
+                    unquote(parsed.password),
+                ),
+            }
+        return {"proxy": self._proxy}
+    
+    def _proxy_to_pyrogram_dict(self) -> Optional[Dict[str, Any]]:
+        """Convert proxy URL string to Pyrogram proxy dict."""
+        if not self._proxy:
+            return None
+        parsed = urlparse(self._proxy)
+        scheme = parsed.scheme.lower()
+        if scheme in ("http", "https"):
+            pyro_scheme = "http"
+            default_port = 8080
+        elif scheme in ("socks5", "socks5h"):
+            pyro_scheme = "socks5"
+            default_port = 1080
+        elif scheme == "socks4":
+            pyro_scheme = "socks4"
+            default_port = 1080
+        else:
+            return None
+        result: Dict[str, Any] = {
+            "scheme": pyro_scheme,
+            "hostname": parsed.hostname or "",
+            "port": parsed.port or default_port,
+        }
+        if parsed.username:
+            result["username"] = parsed.username
+        if parsed.password:
+            result["password"] = parsed.password
+        return result
+    
     def _is_token_valid(self) -> bool:
         """Check if current token is valid."""
         if not self._token:
@@ -91,7 +149,8 @@ class MarketClient:
                     "maxPrice": None, "minPrice": None, "mintable": None,
                     "number": None, "count": 1, "cursor": "", "query": None,
                     "promotedFirst": False,
-                }
+                },
+                **self._get_request_kwargs(),
             )
             return response.status_code != 401
         except Exception:
@@ -99,11 +158,13 @@ class MarketClient:
     
     async def _get_new_token(self) -> str:
         """Get a new authentication token from Telegram."""
+        proxy_dict = None if self._proxy_api_only else self._proxy_to_pyrogram_dict()
         client = Client(
             self._session_name,
             self._api_id,
             self._api_hash,
-            workdir=self._workdir
+            workdir=self._workdir,
+            proxy=proxy_dict,
         )
         
         async with client:
@@ -124,7 +185,8 @@ class MarketClient:
             
             response = requests.post(
                 f"{self.API_URL}/auth",
-                json={"data": init_data}
+                json={"data": init_data},
+                **self._get_request_kwargs(),
             )
             
             if response.status_code != 200:
@@ -157,10 +219,15 @@ class MarketClient:
         
         url = f"{self.API_URL}{endpoint}"
         
+        kwargs = self._get_request_kwargs()
         if method == "GET":
-            response = requests.get(url, headers=self._get_headers(), params=params)
+            response = requests.get(
+                url, headers=self._get_headers(), params=params, **kwargs
+            )
         else:
-            response = requests.post(url, headers=self._get_headers(), json=json, params=params)
+            response = requests.post(
+                url, headers=self._get_headers(), json=json, params=params, **kwargs
+            )
         
         # Handle token expiration
         if response.status_code == 401 and retry_on_401:
