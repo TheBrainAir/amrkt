@@ -35,7 +35,7 @@ from .exceptions import (
     APIError,
 )
 
-__version__ = "1.4.2"
+__version__ = "1.5.0"
 __all__ = [
     "MarketClient",
     "UserInfo",

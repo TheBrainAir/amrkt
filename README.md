@@ -15,6 +15,7 @@ A fast, type-safe, and secure library with automatic authentication handling.
 - 🔐 **Auto-authentication** - Token refresh handled automatically  
 - 📦 **Type-safe** - Full Pydantic models with type hints
 - 🎯 **Simple API** - Intuitive method names
+- 🛡️ **Anti-detection** - Browser TLS fingerprint, headers, and User-Agent rotation
 
 ## Installation
 
@@ -70,8 +71,10 @@ MarketClient(
     api_hash: str,                  # Telegram API hash
     session_name: str = "amrkt",    # Pyrogram session name
     workdir: str = ".",             # Session file directory
-    proxy: str = None,              # Optional: http://host:port, http://user:pass@host:port,
-    proxy_api_only: bool = False    # socks5://host:port. Use True if HTTP proxy gives 407
+    proxy: str = None,              # Optional: http://host:port, socks5://host:port
+    proxy_api_only: bool = False,   # Use True if HTTP proxy gives 407
+    impersonate: str = "chrome124", # TLS fingerprint (chrome99-chrome124, safari15_3, etc.)
+    user_agent: str = None,         # Custom User-Agent (random by default)
 )
 ```
 
@@ -578,6 +581,33 @@ client = MarketClient(
     api_hash="hash",
     proxy="http://user:pass@proxy.example.com:8080",
     proxy_api_only=True  # API via proxy, Telegram connection direct
+)
+```
+
+### Anti-Detection (TLS Fingerprint & User-Agent)
+
+All requests use browser-like headers, Cookie, and TLS fingerprint impersonation by default. You can customize the fingerprint and User-Agent:
+
+```python
+# Custom TLS fingerprint
+client = MarketClient(
+    api_id=12345,
+    api_hash="hash",
+    impersonate="safari17_4_1"  # or "chrome120", "chrome124", etc.
+)
+
+# Custom User-Agent
+client = MarketClient(
+    api_id=12345,
+    api_hash="hash",
+    user_agent="Mozilla/5.0 (Linux; Android 14; ...) Chrome/124.0.6367.82 Mobile Safari/537.36"
+)
+
+# Disable TLS impersonation
+client = MarketClient(
+    api_id=12345,
+    api_hash="hash",
+    impersonate=""  # Empty string disables it
 )
 ```
 

@@ -1,12 +1,23 @@
 """Main client for amrkt library."""
 
-from typing import Optional, List, Dict, Any
+import random
+from typing import Optional, List, Dict, Any, Tuple
 from urllib.parse import unquote, urlparse
 
 from pyrogram import Client
 from pyrogram.raw.functions.messages import RequestAppWebView
 from pyrogram.raw.types import InputBotAppShortName
 from curl_cffi import requests
+
+
+_USER_AGENTS = [
+    "Mozilla/5.0 (Linux; Android 14; SM-S928B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.6367.82 Mobile Safari/537.36",
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 17_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1",
+    "Mozilla/5.0 (Linux; Android 14; Pixel 8 Pro) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.6367.82 Mobile Safari/537.36",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko)",
+    "Mozilla/5.0 (Linux; Android 13; SM-A546B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.6367.82 Mobile Safari/537.36",
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/124.0.6367.88 Mobile/15E148 Safari/604.1",
+]
 
 from .models import (
     UserInfo,
@@ -48,6 +59,8 @@ class MarketClient:
         workdir: str = ".",
         proxy: Optional[str] = None,
         proxy_api_only: bool = False,
+        impersonate: str = "chrome124",
+        user_agent: Optional[str] = None,
     ):
         """
         Initialize the Market client.
@@ -63,6 +76,11 @@ class MarketClient:
             proxy_api_only: If True, use proxy only for API requests (api.tgmrkt.io),
                 not for Telegram connection. Use when HTTP proxy causes 407 with Pyrogram.
                 Requires direct access to Telegram for auth.
+            impersonate: Browser TLS fingerprint to impersonate (default: "chrome124").
+                Supported values: chrome99-chrome124, safari15_3-safari17_4_1, etc.
+                Set to "" to disable impersonation.
+            user_agent: Custom User-Agent string. If not provided, a random
+                browser User-Agent is selected automatically.
         """
         self._api_id = api_id
         self._api_hash = api_hash
@@ -70,6 +88,8 @@ class MarketClient:
         self._workdir = workdir
         self._proxy = proxy
         self._proxy_api_only = proxy_api_only
+        self._impersonate = impersonate or None
+        self._user_agent = user_agent or random.choice(_USER_AGENTS)
         self._client: Optional[Client] = None
         self._token: Optional[str] = None
     
@@ -83,13 +103,35 @@ class MarketClient:
         pass
     
     def _get_headers(self) -> dict:
-        """Get authorization headers."""
-        return {"Authorization": self._token} if self._token else {}
+        """Get full browser-like headers with authorization."""
+        headers = {
+            "Accept": "application/json, text/plain, */*",
+            "Accept-Encoding": "gzip, deflate, br",
+            "Accept-Language": "en-GB,en-US;q=0.9,en;q=0.8",
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "Host": "api.tgmrkt.io",
+            "Origin": "https://cdn.tgmrkt.io",
+            "Pragma": "no-cache",
+            "Priority": "u=3, i",
+            "Referer": "https://cdn.tgmrkt.io/",
+            "Sec-Fetch-Dest": "empty",
+            "Sec-Fetch-Mode": "cors",
+            "Sec-Fetch-Site": "same-site",
+            "User-Agent": self._user_agent,
+        }
+        if self._token:
+            headers["Authorization"] = self._token
+            headers["Cookie"] = f"access_token={self._token}"
+        return headers
     
     def _get_request_kwargs(self) -> Dict[str, Any]:
-        """Get kwargs for curl_cffi requests (proxy + proxy_auth)."""
+        """Get kwargs for curl_cffi requests (proxy + proxy_auth + impersonate)."""
+        kwargs: Dict[str, Any] = {}
+        if self._impersonate:
+            kwargs["impersonate"] = self._impersonate
         if not self._proxy:
-            return {}
+            return kwargs
         parsed = urlparse(self._proxy)
         # For proxy with auth, curl_cffi needs proxy_auth separately
         # to avoid 407 Proxy Authentication Required
@@ -97,14 +139,14 @@ class MarketClient:
             default_port = 8080 if parsed.scheme in ("http", "https") else 1080
             port = parsed.port or default_port
             clean_proxy = f"{parsed.scheme}://{parsed.hostname}:{port}"
-            return {
-                "proxy": clean_proxy,
-                "proxy_auth": (
-                    unquote(parsed.username),
-                    unquote(parsed.password),
-                ),
-            }
-        return {"proxy": self._proxy}
+            kwargs["proxy"] = clean_proxy
+            kwargs["proxy_auth"] = (
+                unquote(parsed.username),
+                unquote(parsed.password),
+            )
+            return kwargs
+        kwargs["proxy"] = self._proxy
+        return kwargs
     
     def _proxy_to_pyrogram_dict(self) -> Optional[Dict[str, Any]]:
         """Convert proxy URL string to Pyrogram proxy dict."""
@@ -140,6 +182,7 @@ class MarketClient:
             return False
         
         try:
+            kwargs = self._get_request_kwargs()
             response = requests.post(
                 f"{self.API_URL}/gifts/saling",
                 headers=self._get_headers(),
@@ -150,7 +193,7 @@ class MarketClient:
                     "number": None, "count": 1, "cursor": "", "query": None,
                     "promotedFirst": False,
                 },
-                **self._get_request_kwargs(),
+                **kwargs,
             )
             return response.status_code != 401
         except Exception:
@@ -183,10 +226,12 @@ class MarketClient:
                 web_view.url.split("tgWebAppData=", 1)[1].split("&tgWebAppVersion", 1)[0]
             )
             
+            auth_kwargs = self._get_request_kwargs()
             response = requests.post(
                 f"{self.API_URL}/auth",
+                headers=self._get_headers(),
                 json={"data": init_data},
-                **self._get_request_kwargs(),
+                **auth_kwargs,
             )
             
             if response.status_code != 200:
@@ -220,13 +265,14 @@ class MarketClient:
         url = f"{self.API_URL}{endpoint}"
         
         kwargs = self._get_request_kwargs()
+        headers = self._get_headers()
         if method == "GET":
             response = requests.get(
-                url, headers=self._get_headers(), params=params, **kwargs
+                url, headers=headers, params=params, **kwargs
             )
         else:
             response = requests.post(
-                url, headers=self._get_headers(), json=json, params=params, **kwargs
+                url, headers=headers, json=json, params=params, **kwargs
             )
         
         # Handle token expiration
