@@ -30,6 +30,8 @@ from .models import (
     SearchParams,
     FeedResponse,
     SaleResult,
+    ActivityItem,
+    ActivityOffer,
 )
 from .exceptions import (
     AuthenticationError,
@@ -657,3 +659,33 @@ class MarketClient:
             expect_json=False,
         )
         return True
+    
+    # ==================== Activities API ====================
+    
+    async def get_activities(
+        self,
+        offset: int = 0,
+        count: int = 20,
+        is_active: bool = True
+    ) -> List[ActivityItem]:
+        """
+        Get user activities.
+        
+        Args:
+            offset: Offset for pagination
+            count: Number of items to return
+            is_active: Filter by active status
+        
+        Returns:
+            List[ActivityItem]: List of activity items
+        """
+        data = await self._request(
+            "GET",
+            "/activities",
+            params={
+                "offset": offset,
+                "count": count,
+                "isActive": str(is_active).lower()
+            }
+        )
+        return [ActivityItem.model_validate(item) for item in (data or [])]

@@ -366,3 +366,33 @@ class SearchParams(BaseModel):
             "query": self.query,
             "promotedFirst": self.promoted_first,
         }
+
+
+class ActivityOffer(BaseModel):
+    """Offer nested inside an activity."""
+    id: str
+    is_mine: bool = Field(default=False, alias="isMine")
+    price_nano_tons: int = Field(default=0, alias="priceNanoTONs")
+    owner_sale_price: int = Field(default=0, alias="ownerSalePrice")
+    gift: Optional[Gift] = None
+    created_at: str = Field(alias="createdAt")
+    end_at: str = Field(alias="endAt")
+    is_notification_seen: bool = Field(default=False, alias="isNotificationSeen")
+    
+    class Config:
+        populate_by_name = True
+    
+    @property
+    def price_ton(self) -> float:
+        """Price in TON."""
+        return self.price_nano_tons / 1_000_000_000
+
+
+class ActivityItem(BaseModel):
+    """Activity item model."""
+    type: str
+    offer: Optional[ActivityOffer] = None
+    date: str
+    
+    class Config:
+        populate_by_name = True

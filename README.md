@@ -351,6 +351,24 @@ Item types:
 
 ---
 
+### Activities Methods
+
+#### `get_activities(...) → List[ActivityItem]`
+
+Get user activities.
+
+```python
+activities = await client.get_activities(offset=0, count=20, is_active=True)
+
+for activity in activities:
+    print(activity.type)
+    print(activity.date)
+    if activity.offer:
+        print(f"Offer Price: {activity.offer.price_ton} TON")
+```
+
+---
+
 ## Data Models
 
 ### UserInfo
