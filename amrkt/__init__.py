@@ -14,6 +14,7 @@ from .models import (
     UserInfo,
     Balance,
     Gift,
+    GiftCollection,
     GiftList,
     PurchaseResult,
     SearchParams,
@@ -35,12 +36,13 @@ from .exceptions import (
     APIError,
 )
 
-__version__ = "1.5.1"
+__version__ = "1.6.0"
 __all__ = [
     "MarketClient",
     "UserInfo",
     "Balance", 
     "Gift",
+    "GiftCollection",
     "GiftList",
     "PurchaseResult",
     "SearchParams",

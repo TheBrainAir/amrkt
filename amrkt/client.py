@@ -25,6 +25,7 @@ from .models import (
     DepositAwaitTransaction,
     ClaimTransactionResult,
     Gift,
+    GiftCollection,
     GiftList,
     PurchaseResult,
     SearchParams,
@@ -419,6 +420,16 @@ class MarketClient:
         """
         data = await self._request("GET", f"/gifts/gift/{gift_id}")
         return Gift.model_validate(data)
+    
+    async def get_collections(self) -> List[GiftCollection]:
+        """
+        Get list of gift collections with metadata (floor price, volume, etc.).
+
+        Returns:
+            List[GiftCollection]: List of collection items
+        """
+        data = await self._request("GET", "/gifts/collections")
+        return [GiftCollection.model_validate(item) for item in (data or [])]
     
     async def buy_gifts(self, gift_ids: List[str]) -> List[PurchaseResult]:
         """

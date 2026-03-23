@@ -268,6 +268,36 @@ class GiftList(BaseModel):
         populate_by_name = True
 
 
+class GiftCollection(BaseModel):
+    """Collection item from GET /gifts/collections."""
+    name: str
+    title: str
+    model_sticker_thumbnail_key: str = Field(alias="modelStickerThumbnailKey")
+    created_at: str = Field(alias="createdAt")
+    floor_price_nano_tons: int = Field(alias="floorPriceNanoTons")
+    previous_day_floor_price_nano_tons: Optional[int] = Field(
+        default=None, alias="previousDayFloorPriceNanoTons"
+    )
+    volume: int = 0
+    is_new: bool = Field(default=False, alias="isNew")
+    is_new_date: str = Field(default="", alias="isNewDate")
+    cashback_coef: Optional[float] = Field(default=None, alias="cashbackCoef")
+    spice_convert_price: int = Field(default=0, alias="spiceConvertPrice")
+    space_monkey_points: Optional[int] = Field(default=None, alias="spaceMonkeyPoints")
+    disabled_craft_from: bool = Field(default=False, alias="disabledCraftFrom")
+    craftable: bool = False
+    is_hidden: bool = Field(default=False, alias="isHidden")
+    tg_craftable: bool = Field(default=False, alias="tgCraftable")
+
+    class Config:
+        populate_by_name = True
+
+    @property
+    def floor_price_ton(self) -> float:
+        """Floor price in TON."""
+        return self.floor_price_nano_tons / 1_000_000_000
+
+
 class PurchaseResult(BaseModel):
     """Result of a gift purchase."""
     user_gift: Optional[Gift] = Field(default=None, alias="userGift")

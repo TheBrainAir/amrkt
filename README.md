@@ -196,6 +196,16 @@ print(gift.is_on_sale)          # Sale status
 print(gift.model_rarity_percent)  # Rarity %
 ```
 
+#### `get_collections() → List[GiftCollection]`
+
+Get list of gift collections with metadata (floor price, volume, craftable, etc.).
+
+```python
+collections = await client.get_collections()
+for c in collections:
+    print(f"{c.title}: {c.floor_price_ton:.2f} TON, craftable={c.craftable}")
+```
+
 #### `buy_gifts(gift_ids) → List[PurchaseResult]`
 
 Purchase gifts by their IDs.
@@ -500,6 +510,29 @@ User profile from `GET /me` API.
 | `model_rarity_percent` | `float` | Model rarity % (property) |
 | `backdrop_rarity_percent` | `float` | Backdrop rarity % (property) |
 | `symbol_rarity_percent` | `float` | Symbol rarity % (property) |
+
+### GiftCollection
+
+Collection item from `GET /gifts/collections` API.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `name` | `str` | Collection name |
+| `title` | `str` | Collection title |
+| `model_sticker_thumbnail_key` | `str` | Thumbnail key for sticker |
+| `created_at` | `str` | Creation date (ISO 8601) |
+| `floor_price_nano_tons` / `floor_price_ton` | `int` / `float` | Floor price in nanoTON / TON |
+| `previous_day_floor_price_nano_tons` | `Optional[int]` | Previous day floor price |
+| `volume` | `int` | Trading volume |
+| `is_new` | `bool` | Whether collection is new |
+| `is_new_date` | `str` | New status date |
+| `cashback_coef` | `Optional[float]` | Cashback coefficient |
+| `spice_convert_price` | `int` | Spice convert price |
+| `space_monkey_points` | `Optional[int]` | Space Monkey points |
+| `disabled_craft_from` | `bool` | Craft from disabled |
+| `craftable` | `bool` | Craftable status |
+| `is_hidden` | `bool` | Hidden status |
+| `tg_craftable` | `bool` | Can be crafted in Telegram |
 
 ### FeedItem
 
